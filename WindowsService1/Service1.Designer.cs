@@ -30,33 +30,23 @@
         {
             this.fileScanTimer = new System.Timers.Timer();
             ((System.ComponentModel.ISupportInitialize)(this.fileScanTimer)).BeginInit();
-            this.timerCloseServer = new System.Timers.Timer();
-            ((System.ComponentModel.ISupportInitialize)(this.timerCloseServer)).BeginInit();
             // 
             // fileScanTimer
             // 
             this.fileScanTimer.Enabled = true;
-            this.fileScanTimer.Interval = 1000;
+            this.fileScanTimer.Interval = 1000D;
             this.fileScanTimer.Elapsed += new System.Timers.ElapsedEventHandler(this.fileScanTimer_Elapsed);
             // 
-            // timerCloseServer
-            // 
-            this.timerCloseServer.Enabled = true;
-            this.timerCloseServer.Interval = 1000;
-            this.timerCloseServer.Elapsed += new System.Timers.ElapsedEventHandler(this.timerCloseServer_Elapsed);
-             
             // ServiceAsWatchdb
             // 
             this.ServiceName = "ServiceAsWatchdb";
             ((System.ComponentModel.ISupportInitialize)(this.fileScanTimer)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.timerCloseServer)).EndInit();
 
         }
 
         #endregion
 
         public System.Timers.Timer fileScanTimer;
-        public System.Timers.Timer timerCloseServer;
 
 
     }

@@ -41,11 +41,6 @@ namespace WindowsService1
 
             //开启检测定时器
             fileScanTimer.Start();
-              
-            timerCloseServer.Enabled = true;
-            timerCloseServer.Interval = interval;//单位：MS
-            timerCloseServer.Start();
-              
         }
 
         /// <summary>
@@ -58,9 +53,6 @@ namespace WindowsService1
             {
                 fileScanTimer.Enabled = false;
                 fileScanTimer.Stop();
-
-                timerCloseServer.Enabled = false;
-                timerCloseServer.Stop();
             }
             catch
             {
@@ -171,17 +163,33 @@ namespace WindowsService1
                 int itemCnt = appItems.Count;
                 string appPath;
                 string processName;
+                string startDate;
+                string endDate;
 
                 // 数组 items 中项的数量 
                 foreach (JsonData app in appItems)
                 // 遍历数组 items            
                 {
-                    appPath = (string)app["path"];
-                    processName = (string)app["processName"];
-                    if (appPath != String.Empty && processName != String.Empty && System.Diagnostics.Process.GetProcessesByName(processName).Length == 0)
+                    if (app.ToJson().Contains("startDate"))
                     {
-                        ExecuteDos(appPath);
+                        startDate = app["startDate"].ToString();
+                        appPath = (string)app["path"];
+                        if (DateTime.Now.ToString("HH:mm").Equals(startDate) && appPath != String.Empty)
+                        {
+                            ExecuteDos(appPath);
+                        }
                     }
+                    else if (app.ToJson().Contains("endDate"))
+                    {
+                        endDate = app["endDate"].ToString();
+                        processName = (string)app["processName"];
+                        if (DateTime.Now.ToString("HH:mm").Equals(endDate) && System.Diagnostics.Process.GetProcessesByName(processName).Length > 0 && processName != String.Empty)
+                        {
+                            ProcessUtility.KillTree(System.Diagnostics.Process.GetProcessesByName(processName)[0].Id);
+                            WriteLog(processName + "进程结束成功。结束时间：" + DateTime.Now.ToString());
+                        }
+                    }
+                   
                 }
             }
             catch (Exception ex)
@@ -192,46 +200,5 @@ namespace WindowsService1
             //开启检测
             fileScanTimer.Enabled = true;  
         }
-
-        /// <summary>
-        /// 定时关闭相关进程
-        /// 2010年12月26日16:32:09
-        /// modify date:2012年9月16日0:01:32
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void timerCloseServer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            timerCloseServer.Enabled = false;
-            try
-            {
-                JsonData appItems = configData["apps"];
-                int itemCnt = appItems.Count;
-                string processName;
-                string closeDate;
-
-                // 数组 items 中项的数量 
-                foreach (JsonData app in appItems)
-                // 遍历数组 items            
-                {
-                    processName = (string)app["processName"];
-                    closeDate = (string)app["closeDate"];
-                    if (processName != String.Empty && closeDate != String.Empty && DateTime.Now.ToString("HH:mm").Equals(closeDate) && System.Diagnostics.Process.GetProcessesByName(processName).Length > 0)
-                    {
-                        ProcessUtility.KillTree(System.Diagnostics.Process.GetProcessesByName(processName)[0].Id);
-                        WriteLog(processName + "进程结束成功。结束时间：" + DateTime.Now.ToString());
-                    }                  
-
-                }
-            }
-            catch (Exception ex)
-            {
-                WriteLog("结束进程报错，时间" + DateTime.Now.ToString() + ".错误信息：" + ex.Message);
-                return;
-            }            
-            timerCloseServer.Enabled = true;
-        }
-
-      
     }
 }
